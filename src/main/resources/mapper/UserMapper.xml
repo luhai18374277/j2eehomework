@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.library.mapper.UserMapper">
+    <insert id="insert" parameterType="com.example.library.entity.User" useGeneratedKeys="true" keyProperty="id">
+        insert into `user`(`name`,pwd,mail,is_admin,state,identity) values(#{name},#{pwd},#{mail},#{isAdmin},#{state},#{identity})
+    </insert>
+</mapper>
