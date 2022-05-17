@@ -16,9 +16,9 @@ import java.util.Date;
 @NoArgsConstructor
 @Data
 @Entity
-public class User {
+public class User {     //需要更新数据库中的表时只会加多余的属性，不会减去删掉的属性，需要的话删表重新运行代码即可
     //属性必须大写，例如int->Integer,bool->Boolean
-    @Id
+    @Id     //这些@行只会影响紧接着的一行代码，例如这三行只影响了id，而对email无影响
     @TableId
     @GeneratedValue(strategy = GenerationType.IDENTITY)  //主键且自主递增
     private Integer id = 0;     //=0似乎没用，但可以不改（由于设置了主键格式）
@@ -27,7 +27,7 @@ public class User {
     private String password;
     private String organization="未设置";      //自动初始化值为“未设置”
     @JsonFormat(pattern = "yyyy-MM-dd")     //时间格式设置
-    private Date createTime;
+    private Date createTime;        //驼峰命名法，数据库中create_time命名成createTime.
     private Integer appointNum=0;       //初始化为0，下同
     private Double debt=0.0;
     private Double deposit=0.0;
