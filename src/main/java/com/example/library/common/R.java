@@ -21,7 +21,7 @@ public class R implements Serializable {
     }
 
     public static R fail(String msg) {
-        return new R(500, null, msg);
+        return new R(400, null, msg);
     }
 
     public static R fail(String msg,int code) {
