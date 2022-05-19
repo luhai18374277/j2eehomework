@@ -32,6 +32,9 @@ public class User {     //需要更新数据库中的表时只会加多余的属
     private Double debt=0.0;
     private Double deposit=0.0;
     private Integer renew=5;
+    private String vercode;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date codeDate;
 
 //    private String avatar;
 //    private Integer identity;
@@ -45,9 +48,7 @@ public class User {     //需要更新数据库中的表时只会加多余的属
 //    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 //    private Date loginDate = new Date();
 //    private Boolean isAdmin;
-//    private String vercode;
-//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-//    private Date codeDate;
+
 //    private Integer scholarid;
 //    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 //    private Date banDate;   //封禁时间

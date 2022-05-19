@@ -22,6 +22,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.example.library.common.VerCodeGenerateUtil.generateVerCode;
+
 @RestController
 @RequestMapping("/user")
 //@Api(description = "普通用户相关接口")
@@ -108,128 +110,120 @@ public class UserController {
         }
     }
 
-//    @PostMapping("/testvercode")
-//    @ApiOperation(notes = "需登录，参数为(作者id)authorId和(邮箱)mail，成功则跳转到/scholar/vercode进行验证码确认", value = "认证学者")
-//    public R beScholar(@RequestBody JSONObject json, HttpSession session) {
-//        try {
-//            if (session.getAttribute("loginUser") == null) {
-//                return R.fail("此操作需要先登录");
-//            }
-//            User user = (User) session.getAttribute("loginUser");
-//            if (user.getIdentity() == 2) {
-//                return R.fail("你已经是学者了");
-//            }
-//            if (json.get("authorId") == null) {
-//                return R.fail("作者id不能为空");
-//            }
-//            if (json.get("mail")==null){
-//                return R.fail("邮箱不能为空");
-//            }
-//
-//            String mail = (String) json.get("mail");
-//            QueryWrapper<User> wrapper0 = new QueryWrapper<>();
-//            wrapper0.eq("mail", mail);
-//            User user1 = userMapper.selectOne(wrapper0);
-//            if (user1 != null) {
-//                return R.fail("邮箱已被使用！如有必要请进行申诉");
-//            }
-//
-//
-//            JSONArray papers = paperService.getPaperByAuthorId((String) json.get("authorId"));
-//            if(papers==null){
-//                return R.fail("错误的authorId？(根据authorId未找到任何paper)");
-//            }  //
-//
-//            if(scholarMapper.selectByAuthorId((String) json.get("authorId"))!=null){
-//                return R.fail("该authorId已被认领，如果是本人认领请勿再进行认领操作，如果是冒领请进行申诉");
-//            }
-//            if(user.getCodeDate()!=null){
-//                long seconds = ChronoUnit.SECONDS.between(Instant.ofEpochMilli(user.getCodeDate().getTime()),
-//                        Instant.ofEpochMilli(new Date().getTime()));  //计算时间
-//                System.out.println(seconds);
-//                if (seconds < 60) {
-//                    return R.fail("一分钟内只能获取一次验证码");
-//                }
-//            }
-//
-//            String verCode = mailService.sendEmailVerCode(mail, generateVerCode());
-//
-//            QueryWrapper<User> wrapper = new QueryWrapper<>();
-//            wrapper.eq("name", user.getName());
-//            user.setCodeDate(new Date());  //设置验证码获得时间
-//            user.setVercode(verCode);
-//            userMapper.update(user, wrapper);
-//            session.setAttribute("loginUser", user); //更新session
-//            session.setAttribute("authorId", json.get("authorId"));
-//            session.setAttribute("mail", mail);
-//            System.out.println("用户" + user.getId() + "的验证码为" + user.getVercode());
-//            return R.success("邮件发送成功");
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return R.fail("邮件发送失败");
-//        }
-//    }
+    @PostMapping("/testvercode")
+    public R testvercode(@RequestBody JSONObject json, HttpSession session) {
+        try {
+            if (json.get("email")==null){
+                return R.fail("邮箱不能为空");
+            }
+            String email = (String) json.get("email");
+            String verCode = mailService.sendEmailVerCode(email, generateVerCode());
+            return R.success("邮件发送成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return R.fail("邮件发送失败");
+        }
+    }
 
-//    @PostMapping("/vercode")
-//    @ApiOperation(notes = "需登录，参数为(作者id)authorId和(邮箱)mail，成功则跳转到/scholar/vercode进行验证码确认", value = "认证学者")
-//    public R beScholar(@RequestBody JSONObject json, HttpSession session) {
-//        try {
-//            if (session.getAttribute("loginUser") == null) {
-//                return R.fail("此操作需要先登录");
-//            }
-//            User user = (User) session.getAttribute("loginUser");
-//            if (user.getIdentity() == 2) {
-//                return R.fail("你已经是学者了");
-//            }
-//            if (json.get("authorId") == null) {
-//                return R.fail("作者id不能为空");
-//            }
-//            if (json.get("mail")==null){
-//                return R.fail("邮箱不能为空");
-//            }
-//
-//            String mail = (String) json.get("mail");
-//            QueryWrapper<User> wrapper0 = new QueryWrapper<>();
-//            wrapper0.eq("mail", mail);
-//            User user1 = userMapper.selectOne(wrapper0);
-//            if (user1 != null) {
-//                return R.fail("邮箱已被使用！如有必要请进行申诉");
-//            }
-//
-//
-//            JSONArray papers = paperService.getPaperByAuthorId((String) json.get("authorId"));
-//            if(papers==null){
-//                return R.fail("错误的authorId？(根据authorId未找到任何paper)");
-//            }  //
-//
-//            if(scholarMapper.selectByAuthorId((String) json.get("authorId"))!=null){
-//                return R.fail("该authorId已被认领，如果是本人认领请勿再进行认领操作，如果是冒领请进行申诉");
-//            }
-//            if(user.getCodeDate()!=null){
-//                long seconds = ChronoUnit.SECONDS.between(Instant.ofEpochMilli(user.getCodeDate().getTime()),
-//                        Instant.ofEpochMilli(new Date().getTime()));  //计算时间
+
+    @PostMapping("/vercode")
+    public R vercode(@RequestBody JSONObject json, HttpSession session) {
+        try {
+            if (session.getAttribute("loginUser") == null) {
+                return R.fail("此操作需要先登录");
+            }
+            User user = (User) session.getAttribute("loginUser");
+
+            if(user.getCodeDate()!=null){
+                long seconds = ChronoUnit.SECONDS.between(Instant.ofEpochMilli(user.getCodeDate().getTime()),
+                        Instant.ofEpochMilli(new Date().getTime()));  //计算时间
+                System.out.println(seconds);
+                if (seconds < 60) {
+                    return R.fail("一分钟内只能获取一次验证码");
+                }
+            }
+            if(user.getEmail()==null) return R.fail("您没有邮箱或邮箱错误");
+            String verCode = mailService.sendEmailVerCode(user.getEmail(), generateVerCode());
+
+            QueryWrapper<User> wrapper = new QueryWrapper<>();
+            wrapper.eq("name", user.getName());
+            user.setCodeDate(new Date());  //设置验证码获得时间
+            user.setVercode(verCode);
+            userMapper.update(user, wrapper);
+            session.setAttribute("loginUser", user); //更新session
+
+            System.out.println("用户" + user.getId() + "的验证码为" + user.getVercode());
+            return R.success("邮件发送成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return R.fail("邮件发送失败");
+        }
+    }
+
+    @PostMapping("/sendvercodebyemail")
+    public R sendvercodebyemail(@RequestBody JSONObject json, HttpSession session) {
+        try {
+            if (json.get("email")==null){
+                return R.fail("邮箱不能为空");
+            }
+            String email = (String) json.get("email");
+            String verCode = mailService.sendEmailVerCode(email, generateVerCode());
+            QueryWrapper<User> wrapper = new QueryWrapper<>();
+            wrapper.eq("email", email);
+            User user = userMapper.selectOne(wrapper);
+            user.setVercode(verCode);
+            user.setCodeDate(new Date());
+            userMapper.update(user, wrapper);
+            session.setAttribute("resetpwdUser", user); //更新session
+            System.out.println("用户" + user.getId() + "的验证码为" + user.getVercode());
+
+            return R.success("邮件发送成功");
+            //跳转到resetpwd
+        } catch (Exception e) {
+            e.printStackTrace();
+            return R.fail("邮件发送失败");
+        }
+    }
+
+    @PostMapping("/resetpwd")
+    public R resetpwd(@RequestBody JSONObject json, HttpSession session) {
+        try {
+            if (session.getAttribute("resetpwdUser") == null) {
+                return R.fail("没有要重置验证码的用户");
+            }
+            User user = (User) session.getAttribute("resetpwdUser");
+
+            if(json.get("vercode")==null) return R.fail("请输入验证码");
+            String vercode=(String) json.get("vercode");
+            if(json.get("password")==null) return R.fail("请输入新密码");
+            String password=(String) json.get("password");
+
+            if(user.getCodeDate()!=null){
+                long seconds = ChronoUnit.SECONDS.between(Instant.ofEpochMilli(user.getCodeDate().getTime()),
+                        Instant.ofEpochMilli(new Date().getTime()));  //计算时间
 //                System.out.println(seconds);
-//                if (seconds < 60) {
-//                    return R.fail("一分钟内只能获取一次验证码");
-//                }
-//            }
-//
-//            String verCode = mailService.sendEmailVerCode(mail, generateVerCode());
-//
-//            QueryWrapper<User> wrapper = new QueryWrapper<>();
-//            wrapper.eq("name", user.getName());
-//            user.setCodeDate(new Date());  //设置验证码获得时间
-//            user.setVercode(verCode);
-//            userMapper.update(user, wrapper);
-//            session.setAttribute("loginUser", user); //更新session
-//            session.setAttribute("authorId", json.get("authorId"));
-//            session.setAttribute("mail", mail);
-//            System.out.println("用户" + user.getId() + "的验证码为" + user.getVercode());
-//            return R.success("邮件发送成功");
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return R.fail("邮件发送失败");
-//        }
-//    }
+                if (seconds >600) {
+                    return R.fail("超时");
+                }
+                if(!vercode.equals(user.getVercode())){
+                    return R.fail("验证码错误");
+                }
+                user.setPassword(DigestUtils.md5DigestAsHex(password.getBytes()));
+                QueryWrapper<User> wrapper = new QueryWrapper<>();
+                wrapper.eq("email", user.getEmail());
+                userMapper.update(user, wrapper);
+                session.removeAttribute("resetpwdUser");
+                session.setAttribute("loginUser", user); //更新session
+
+                return R.success("密码修改成功");
+            }else {
+                return R.fail("没有获取验证码时间，这不正常");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return R.fail("reset错误");
+        }
+    }
 
 }
