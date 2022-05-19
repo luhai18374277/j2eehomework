@@ -13,6 +13,17 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+  mail:
+    host: smtp.qq.com    #邮箱服务器地址
+    username: 1067865757@qq.com   #邮箱账号
+    password: ggwwhhytbvuhbecd      #邮箱授权码
+    default-encoding: utf-8    #默认编码
+    properties:
+      mail:
+        stmp:
+          ssl:
+            enable=true:
+
 
 
 
