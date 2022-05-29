@@ -110,6 +110,46 @@ public class UserController {
         }
     }
 
+    @PostMapping("/logout")
+    public R logout(HttpSession session) {
+        try {
+            if (session.getAttribute("loginUser") == null) {
+                return R.fail("未登录");
+            }
+            session.removeAttribute("loginUser");
+            if (session.getAttribute("loginUser") == null) {
+                System.out.println("用户信息已清除，已成功退出登录");
+            }
+            return R.success("登出成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return R.fail("登出错误");
+        }
+    }
+
+    @PostMapping("/editinfo")
+    public R editinfo(@RequestBody User user, HttpSession session) {
+        if (user.getId() == null) {
+            return R.fail("id不存在");
+        }
+        if (user.getPassword() != null) {
+            user.setPassword(DigestUtils.md5DigestAsHex(user.getPassword().getBytes()));
+        }
+        if (user.getName()!=null){
+            if (!userMapper.selectById(user.getId()).getName().equals(user.getName())){
+                QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+                queryWrapper.eq("name",user.getName());
+                if (userMapper.selectCount(queryWrapper) != 0){
+                    return R.fail("用户名存在");
+                }
+            }
+        }
+        if (userMapper.updateById(user) == 0) {
+            return R.fail("用户不存在");
+        }
+        return R.success("修改成功");
+    }
+
     @PostMapping("/testvercode")
     public R testvercode(@RequestBody JSONObject json, HttpSession session) {
         try {
