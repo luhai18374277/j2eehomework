@@ -4,10 +4,15 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.library.common.R;
+import com.example.library.emenu.SessionKey;
 import com.example.library.entity.User;
 import com.example.library.mapper.UserMapper;
 import com.example.library.service.MailService;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,7 +99,7 @@ public class UserController {
                 if (DigestUtils.md5DigestAsHex(user.getPassword().getBytes()).equals(user1.getPassword())) {
 //                    user1.setLoginDate(new Date());
 //                    userMapper.update(user1, wrapper);  //更新登录时间
-                    session.setAttribute("loginUser", user1);
+                    session.setAttribute(SessionKey.MANANGER_SESSION_key.getCode(), user1);
                     session.setMaxInactiveInterval(60 * 60);  //
 
                     return R.success(user1);
@@ -264,6 +269,33 @@ public class UserController {
             e.printStackTrace();
             return R.fail("reset错误");
         }
+    }
+
+
+    /**
+     * 获取用户列表功能
+     * @param session
+     * @param param(pageNo:1,pageSize:5)
+     * @return
+     */
+    @PostMapping("getUserPage")
+    @ApiOperation("获取用户列表")
+    public R getUserPage(HttpSession session,@RequestBody JSONObject param){
+        if (session.getAttribute(SessionKey.MANANGER_SESSION_key.getCode()) == null){
+            return R.fail("请使用管理员账号登录");
+        }
+        //页码，长度
+        int pageNo = 1,pageSize = 5;
+        if (param.containsKey("pageNo")){
+            pageNo = param.getInteger("pageNo");
+        }
+        if (param.containsKey("pageSize")){
+            pageSize = param.getInteger("pageSize");
+        }
+        PageHelper.startPage(pageNo,pageSize);
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        PageInfo<User> pageInfo = new PageInfo<>(userMapper.selectList(queryWrapper));
+         return R.success(pageInfo);
     }
 
 }

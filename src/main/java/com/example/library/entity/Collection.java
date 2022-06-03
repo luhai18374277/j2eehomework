@@ -20,7 +20,9 @@ public class Collection {
     @Id
     @TableId
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id = 0;
     private Integer uid = 0;        //同时也是外键
 
     private String bid;     //外键未设置
+
 }

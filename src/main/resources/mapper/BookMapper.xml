@@ -2,4 +2,27 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.library.mapper.BookMapper">
 
+    <select id="searchList" resultType="com.alibaba.fastjson.JSONObject"
+            parameterType="com.alibaba.fastjson.JSONObject">
+        select book.*,(     select count(record.rid) from  record record where book.symbol_num = record.symbol_num) as 'recordCount'
+        from book book
+        where
+            1=1
+            <if test="book_name != null and book_name !=''">
+               and  book.book_name like concat('%',#{book_name},'%')
+            </if>
+            <if test="symbol_num != null and symbol_num !=''">
+                and book.symbol_num like concat('%',#{symbol_num},'%')
+            </if>
+            <if test="tag != null and tag !=''">
+                and book.tag  = #{tag}
+            </if>
+            <if test="author != null and author !=''">
+                and book.author like concat('%',#{author},'%')
+            </if>
+            <if test="hotRecommend != null and hotRecommend != ''">
+                order by 'recordCount' desc
+            </if>
+
+    </select>
 </mapper>

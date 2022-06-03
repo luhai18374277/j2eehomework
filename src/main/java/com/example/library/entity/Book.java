@@ -1,6 +1,8 @@
 package com.example.library.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,6 +22,7 @@ public class Book {
     @TableId
     private String symbolNum = "未设置";
 
+    @TableField("ISBN")
     private String ISBN = "未设置";
     private String book_name = "未设置";
     private String tag = "未设置";
@@ -32,4 +35,5 @@ public class Book {
     private Integer scoreNum = 0;
     private Double price = 0.00;
 
+    private Integer RemainingQuantity;
 }
