@@ -1,5 +1,6 @@
 package com.example.library.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -132,11 +133,13 @@ public class UserController {
         }
     }
 
-    @PostMapping("/editinfo")
+    @PostMapping("/modify")
     public R editinfo(@RequestBody User user, HttpSession session) {
-        if (user.getId() == null) {
-            return R.fail("id不存在");
+
+        if (session.getAttribute(SessionKey.USER_SESSION_key.getCode()) == null){
+            return R.fail("请先登录");
         }
+        user.setId(JSON.parseObject(JSONObject.toJSONString(session.getAttribute(SessionKey.USER_SESSION_key.getCode())),User.class).getId());
         if (user.getPassword() != null) {
             user.setPassword(DigestUtils.md5DigestAsHex(user.getPassword().getBytes()));
         }
@@ -152,7 +155,8 @@ public class UserController {
         if (userMapper.updateById(user) == 0) {
             return R.fail("用户不存在");
         }
-        return R.success("修改成功");
+
+        return R.success(user);
     }
 
     @PostMapping("/testvercode")
