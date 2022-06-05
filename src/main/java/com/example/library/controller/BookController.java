@@ -86,6 +86,8 @@ public class BookController {
             return R.fail("您已经借出该书");
         }else  if (record.getIsReturn() == 2){
             return R.fail("您已归还该书");
+        }else  if (record.getIsReturn() == 4){
+            return R.fail("您已取消预约该书");
         }
         record.setBorrowTime(new Date());
         record.setIsReturn(1);
@@ -316,4 +318,23 @@ public class BookController {
         return R.success(pageInfo);
     }
 
+    @PostMapping("cancelReservation/{id}")
+    @ApiOperation("取消预约")
+    public R cancelReservation(HttpSession session,@PathVariable("id") String id){
+        if (session.getAttribute(SessionKey.USER_SESSION_key.getCode()) == null){
+            return R.fail("请先登录");
+        }
+        Object attribute = session.getAttribute(SessionKey.USER_SESSION_key.getCode());
+        Integer userId = JSON.parseObject(JSONObject.toJSONString(attribute),User.class).getId();
+        QueryWrapper<Record> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("id",userId);
+        queryWrapper.eq("symbol_num",id);
+        queryWrapper.eq("is_return",3);
+        Record record = recordMapper.selectOne(queryWrapper);
+        if ( record== null){
+            return R.fail("未查询到预约记录");
+        }
+        record.setIsReturn(4);
+        return recordMapper.updateById(record) ==0? R.fail("取消预约失败") : R.success("取消成功");
+    }
 }

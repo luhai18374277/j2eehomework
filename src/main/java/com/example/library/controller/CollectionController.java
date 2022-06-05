@@ -44,4 +44,23 @@ public class CollectionController {
         return collectionMapper.insert(collection) == 0? R.fail("收藏失败") : R.success("收藏成功");
     }
 
+    @PostMapping("delCollection/{id}")
+    public R delCollection(HttpSession session, @PathVariable("id")String id){
+        Object attribute = session.getAttribute(SessionKey.USER_SESSION_key.getCode());
+
+        if (session.getAttribute(SessionKey.USER_SESSION_key.getCode()) == null){
+            return R.fail("请先登录");
+        }
+        User user = JSON.parseObject(JSONObject.toJSONString(attribute),User.class);
+
+        QueryWrapper<Collection> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("uid",user.getId());
+        queryWrapper.eq("bid",id);
+        Collection collection = collectionMapper.selectOne(queryWrapper);
+        if (collectionMapper.selectCount(queryWrapper) == 0){
+            return R.fail("未查询到收藏记录");
+        }
+        return collectionMapper.deleteById(collection.getId()) == 0? R.fail("取消收藏失败") : R.success("取消收藏成功");
+    }
+
 }
