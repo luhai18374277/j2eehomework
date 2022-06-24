@@ -9,7 +9,11 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.library.common.R;
 import com.example.library.emenu.SessionKey;
+import com.example.library.entity.Collection;
+import com.example.library.entity.Record;
 import com.example.library.entity.User;
+import com.example.library.mapper.CollectionMapper;
+import com.example.library.mapper.RecordMapper;
 import com.example.library.mapper.UserMapper;
 import com.example.library.service.MailService;
 import com.github.pagehelper.PageHelper;
@@ -38,9 +42,27 @@ public class UserController {
     private UserMapper userMapper;
     @Autowired
     private MailService mailService;
+    @Resource
+    private RecordMapper recordMapper;
+    @Resource
+    private CollectionMapper collectionMapper;
     @GetMapping("/hello")
     public String hello() {
         return "hello";
+    }
+    @GetMapping("/info")
+    public R userinfo(HttpSession session) {
+        try {
+            if (session.getAttribute("loginUser") == null) {
+                return R.fail("此操作需要先登录");
+            }
+            User user = (User) session.getAttribute("loginUser");
+            return R.success(user);
+        }catch (Exception e) {
+            e.printStackTrace();
+            return R.fail("未知错误");
+        }
+
     }
 
     @PostMapping("/register")
@@ -84,18 +106,7 @@ public class UserController {
             User user1 = userMapper.selectOne(wrapper);
 
             if (user1 != null) {
-//                if (user1.getState() == 2) {
-//                    long seconds = ChronoUnit.SECONDS.between(Instant.ofEpochMilli(user1.getBanDate().getTime()),
-//                            Instant.ofEpochMilli(new Date().getTime()));  //计算时间
-//                    System.out.println(seconds);
-//                    if (seconds < 0) {
-//                        return R.fail("用户已被封禁至"+user1.getBanDate());
-//                    }
-//                    else {
-//                        user1.setState(0);
-//                        user1.setBanDate(null);
-//                    }
-//                }
+
 
                 if (DigestUtils.md5DigestAsHex(user.getPassword().getBytes()).equals(user1.getPassword())) {
 //                    user1.setLoginDate(new Date());
@@ -302,4 +313,103 @@ public class UserController {
          return R.success(pageInfo);
     }
 
+    @GetMapping("/books")
+    @ApiOperation("获取当前个人借书信息")
+    public R getUserBooks(HttpSession session,@RequestBody JSONObject param){
+        if (session.getAttribute(SessionKey.USER_SESSION_key.getCode()) == null){
+            return R.fail("未登录");
+        }
+        User user=(User) session.getAttribute(SessionKey.USER_SESSION_key.getCode());
+        //页码，长度
+        int pageNo = 1,pageSize = 5;
+        if (param.containsKey("pageNo")){
+            pageNo = param.getInteger("pageNo");
+        }
+        if (param.containsKey("pageSize")){
+            pageSize = param.getInteger("pageSize");
+        }
+        PageHelper.startPage(pageNo,pageSize);
+        QueryWrapper<Record> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("id",user.getId());
+        queryWrapper.eq("is_return",1);
+
+//        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        PageInfo<Record> pageInfo = new PageInfo<>(recordMapper.selectList(queryWrapper));
+        return R.success(pageInfo);
+    }
+
+    @GetMapping("/history")
+    @ApiOperation("获取个人借书历史")
+    public R getUserhistory(HttpSession session,@RequestBody JSONObject param){
+        if (session.getAttribute(SessionKey.USER_SESSION_key.getCode()) == null){
+            return R.fail("未登录");
+        }
+        User user=(User) session.getAttribute(SessionKey.USER_SESSION_key.getCode());
+        //页码，长度
+        int pageNo = 1,pageSize = 5;
+        if (param.containsKey("pageNo")){
+            pageNo = param.getInteger("pageNo");
+        }
+        if (param.containsKey("pageSize")){
+            pageSize = param.getInteger("pageSize");
+        }
+        PageHelper.startPage(pageNo,pageSize);
+        QueryWrapper<Record> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("id",user.getId());
+        queryWrapper.eq("is_return",2);
+
+//        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        PageInfo<Record> pageInfo = new PageInfo<>(recordMapper.selectList(queryWrapper));
+        return R.success(pageInfo);
+    }
+
+    @GetMapping("/reserve")
+    @ApiOperation("获取个人预约信息")
+    public R getUserreserve(HttpSession session,@RequestBody JSONObject param){
+        if (session.getAttribute(SessionKey.USER_SESSION_key.getCode()) == null){
+            return R.fail("未登录");
+        }
+        User user=(User) session.getAttribute(SessionKey.USER_SESSION_key.getCode());
+        //页码，长度
+        int pageNo = 1,pageSize = 5;
+        if (param.containsKey("pageNo")){
+            pageNo = param.getInteger("pageNo");
+        }
+        if (param.containsKey("pageSize")){
+            pageSize = param.getInteger("pageSize");
+        }
+        PageHelper.startPage(pageNo,pageSize);
+        QueryWrapper<Record> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("id",user.getId());
+        queryWrapper.eq("is_return",3);
+
+//        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        PageInfo<Record> pageInfo = new PageInfo<>(recordMapper.selectList(queryWrapper));
+        return R.success(pageInfo);
+    }
+
+
+    @GetMapping("/getSubscribe")
+    @ApiOperation("获取个人收藏信息")
+    public R getUserSubscribe(HttpSession session,@RequestBody JSONObject param){
+        if (session.getAttribute(SessionKey.USER_SESSION_key.getCode()) == null){
+            return R.fail("未登录");
+        }
+        User user=(User) session.getAttribute(SessionKey.USER_SESSION_key.getCode());
+        //页码，长度
+        int pageNo = 1,pageSize = 5;
+        if (param.containsKey("pageNo")){
+            pageNo = param.getInteger("pageNo");
+        }
+        if (param.containsKey("pageSize")){
+            pageSize = param.getInteger("pageSize");
+        }
+        PageHelper.startPage(pageNo,pageSize);
+        QueryWrapper<Collection> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("uid",user.getId());
+
+//        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        PageInfo<Collection> pageInfo = new PageInfo<>(collectionMapper.selectList(queryWrapper));
+        return R.success(pageInfo);
+    }
 }

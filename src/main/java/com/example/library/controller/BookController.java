@@ -121,7 +121,6 @@ public class BookController {
         }
         if (param.getString("password").equals("")){
             return R.fail("请输入密码");
-
         }
         /**
          * 验证用户信息
@@ -337,4 +336,6 @@ public class BookController {
         record.setIsReturn(4);
         return recordMapper.updateById(record) ==0? R.fail("取消预约失败") : R.success("取消成功");
     }
+
+
 }
