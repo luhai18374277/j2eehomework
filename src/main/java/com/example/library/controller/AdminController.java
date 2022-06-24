@@ -100,7 +100,7 @@ public class AdminController {
                 String select=param.getString("select");
                 String search=param.getString("search");
                 if(select.equals("图书id")){
-                    queryWrapper.eq("symbolNum",search);
+                    queryWrapper.eq("symbol_num",search);
                 }else if(select.equals("图书名称")){
                     QueryWrapper<Book> BookqueryWrapper = new QueryWrapper<>();
 
@@ -108,7 +108,7 @@ public class AdminController {
 
                     Book book=bookMapper.selectOne(BookqueryWrapper);
 
-                    queryWrapper.eq("symbolNum",book.getSymbolNum());
+                    queryWrapper.eq("symbol_num",book.getSymbolNum());
 
                 }else if(select.equals("借阅者id")){
                     queryWrapper.eq("id",search);
@@ -153,7 +153,7 @@ public class AdminController {
                 String select=param.getString("select");
                 String search=param.getString("search");
                 if(select.equals("图书id")){
-                    queryWrapper.eq("symbolNum",search);
+                    queryWrapper.eq("symbol_num",search);
                 }else if(select.equals("图书名称")){
                     queryWrapper.eq("book_name",search);
                 }else if(select.equals("作者")){
