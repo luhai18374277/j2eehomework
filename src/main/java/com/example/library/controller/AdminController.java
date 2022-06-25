@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/admin")
@@ -36,6 +38,38 @@ public class AdminController {
     private RecordMapper recordMapper;
     @Resource
     private CollectionMapper collectionMapper;
+
+    @PostMapping("/login")
+    @ApiOperation(notes = "使用用户密码", value = "登录")
+    public R login(@RequestBody Manager user, HttpSession session) {
+
+        String name = user.getName();
+        String password = user.getPassword();
+        Map<String, Object> map = new HashMap<>();
+        try {
+            QueryWrapper<Manager> wrapper = new QueryWrapper<>();
+            wrapper.eq("name", name);
+            Manager user1 = managerMapper.selectOne(wrapper);
+
+            if (user1 != null) {
+                if (DigestUtils.md5DigestAsHex(user.getPassword().getBytes()).equals(user1.getPassword())) {
+//                    user1.setLoginDate(new Date());
+//                    userMapper.update(user1, wrapper);  //更新登录时间
+                    session.setAttribute(SessionKey.MANANGER_SESSION_key.getCode(), user1);
+                    session.setMaxInactiveInterval(60 * 60);  //
+
+                    return R.success(user1);
+                } else {
+                    return R.fail("密码错误");
+                }
+            } else {
+                return R.fail("不存在该用户名");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return R.fail("未知错误");
+        }
+    }
 
     @GetMapping("/info")
     public R admininfo(HttpSession session) {
@@ -87,7 +121,7 @@ public class AdminController {
             }
             Manager user=(Manager) session.getAttribute(SessionKey.MANANGER_SESSION_key.getCode());
             //页码，长度
-            int pageNo = 1,pageSize = 5;
+            int pageNo = 1,pageSize = 4;
             if (param.containsKey("pageNo")){
                 pageNo = param.getInteger("pageNo");
             }
@@ -140,7 +174,7 @@ public class AdminController {
             }
             Manager user=(Manager) session.getAttribute(SessionKey.MANANGER_SESSION_key.getCode());
             //页码，长度
-            int pageNo = 1,pageSize = 5;
+            int pageNo = 1,pageSize = 4;
             if (param.containsKey("pageNo")){
                 pageNo = param.getInteger("pageNo");
             }

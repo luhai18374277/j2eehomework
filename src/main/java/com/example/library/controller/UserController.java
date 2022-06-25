@@ -9,9 +9,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.library.common.R;
 import com.example.library.emenu.SessionKey;
-import com.example.library.entity.Collection;
-import com.example.library.entity.Record;
-import com.example.library.entity.User;
+import com.example.library.entity.*;
+import com.example.library.mapper.BookMapper;
 import com.example.library.mapper.CollectionMapper;
 import com.example.library.mapper.RecordMapper;
 import com.example.library.mapper.UserMapper;
@@ -40,6 +39,8 @@ import static com.example.library.common.VerCodeGenerateUtil.generateVerCode;
 public class UserController {
     @Resource
     private UserMapper userMapper;
+    @Resource
+    private BookMapper bookMapper;
     @Autowired
     private MailService mailService;
     @Resource
@@ -106,8 +107,6 @@ public class UserController {
             User user1 = userMapper.selectOne(wrapper);
 
             if (user1 != null) {
-
-
                 if (DigestUtils.md5DigestAsHex(user.getPassword().getBytes()).equals(user1.getPassword())) {
 //                    user1.setLoginDate(new Date());
 //                    userMapper.update(user1, wrapper);  //更新登录时间
@@ -300,7 +299,7 @@ public class UserController {
             return R.fail("请使用管理员账号登录");
         }
         //页码，长度
-        int pageNo = 1,pageSize = 5;
+        int pageNo = 1,pageSize = 4;
         if (param.containsKey("pageNo")){
             pageNo = param.getInteger("pageNo");
         }
@@ -321,7 +320,7 @@ public class UserController {
         }
         User user=(User) session.getAttribute(SessionKey.USER_SESSION_key.getCode());
         //页码，长度
-        int pageNo = 1,pageSize = 5;
+        int pageNo = 1,pageSize = 4;
         if (param.containsKey("pageNo")){
             pageNo = param.getInteger("pageNo");
         }
@@ -346,7 +345,7 @@ public class UserController {
         }
         User user=(User) session.getAttribute(SessionKey.USER_SESSION_key.getCode());
         //页码，长度
-        int pageNo = 1,pageSize = 5;
+        int pageNo = 1,pageSize = 4;
         if (param.containsKey("pageNo")){
             pageNo = param.getInteger("pageNo");
         }
@@ -371,7 +370,7 @@ public class UserController {
         }
         User user=(User) session.getAttribute(SessionKey.USER_SESSION_key.getCode());
         //页码，长度
-        int pageNo = 1,pageSize = 5;
+        int pageNo = 1,pageSize = 4;
         if (param.containsKey("pageNo")){
             pageNo = param.getInteger("pageNo");
         }
@@ -397,7 +396,7 @@ public class UserController {
         }
         User user=(User) session.getAttribute(SessionKey.USER_SESSION_key.getCode());
         //页码，长度
-        int pageNo = 1,pageSize = 5;
+        int pageNo = 1,pageSize = 4;
         if (param.containsKey("pageNo")){
             pageNo = param.getInteger("pageNo");
         }
@@ -411,5 +410,54 @@ public class UserController {
 //        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         PageInfo<Collection> pageInfo = new PageInfo<>(collectionMapper.selectList(queryWrapper));
         return R.success(pageInfo);
+    }
+
+    @GetMapping("/searchbooks")
+    @ApiOperation("获取图书信息")
+    public R getBooks(HttpSession session,@RequestBody JSONObject param){
+        try {
+
+            if (session.getAttribute(SessionKey.USER_SESSION_key.getCode()) == null){
+                return R.fail("未登录");
+            }
+            Manager user=(Manager) session.getAttribute(SessionKey.USER_SESSION_key.getCode());
+            //页码，长度
+            int pageNo = 1,pageSize = 4;
+            if (param.containsKey("pageNo")){
+                pageNo = param.getInteger("pageNo");
+            }
+            if (param.containsKey("pageSize")){
+                pageSize = param.getInteger("pageSize");
+            }
+            PageHelper.startPage(pageNo,pageSize);
+            QueryWrapper<Book> queryWrapper = new QueryWrapper<>();
+            if(param.containsKey("select") && param.containsKey("search")){
+                String select=param.getString("select");
+                String search=param.getString("search");
+                if(select.equals("图书id")){
+                    queryWrapper.eq("symbol_num",search);
+                }else if(select.equals("图书名称")){
+                    queryWrapper.eq("book_name",search);
+                }else if(select.equals("作者")){
+                    queryWrapper.eq("author",search);
+                }else if(select.equals("出版社")){
+                    queryWrapper.eq("publisher",search);
+                }else if(select.equals("类型")){
+                    queryWrapper.eq("tag",search);
+                }else {
+                    return R.fail("select参数错误");
+                }
+            }else {
+                return R.fail("缺少参数select或search");
+            }
+            //        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+            if(!param.containsKey("current")) return R.fail("缺少参数current");
+            PageInfo<Book> pageInfo = new PageInfo<>(bookMapper.selectList(queryWrapper),param.getInteger("current"));
+
+            return R.success(pageInfo);
+        }catch (Exception e) {
+            e.printStackTrace();
+            return R.fail("未知错误");
+        }
     }
 }

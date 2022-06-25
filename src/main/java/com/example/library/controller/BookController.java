@@ -46,7 +46,7 @@ public class BookController {
     @PostMapping("Borrowbooks")
     @ApiOperation("借书功能")
     public R Borrowbooks(@RequestBody JSONObject jsonObject, HttpSession session){
-        if (session.getAttribute(SessionKey.MANANGER_SESSION_key.getCode()) == null ){
+        if (session.getAttribute(SessionKey.USER_SESSION_key.getCode()) == null ){
             return R.fail("请使用管理员账号登录");
         }
         if (!jsonObject.containsKey("symbolNum")){
@@ -176,7 +176,7 @@ public class BookController {
             return R.fail("请使用管理员账号登录");
         }
         //页码，长度
-        int pageNo = 1,pageSize = 5;
+        int pageNo = 1,pageSize = 4;
         if (param.containsKey("pageNo")){
             pageNo = param.getInteger("pageNo");
         }
@@ -305,7 +305,7 @@ public class BookController {
     @ApiOperation("搜索书")
     public R searchBook(@RequestBody JSONObject param){
         //页码，长度
-        int pageNo = 1,pageSize = 5;
+        int pageNo = 1,pageSize = 4;
         if (param.containsKey("pageNo")){
             pageNo = param.getInteger("pageNo");
         }
