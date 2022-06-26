@@ -71,6 +71,23 @@ public class AdminController {
         }
     }
 
+    @PostMapping("/logout")
+    public R logout(HttpSession session) {
+        try {
+            if (session.getAttribute("loginAdmin") == null) {
+                return R.fail("未登录");
+            }
+            session.removeAttribute("loginAdmin");
+            if (session.getAttribute("loginAdmin") == null) {
+                System.out.println("用户信息已清除，已成功退出登录");
+            }
+            return R.success("登出成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return R.fail("登出错误");
+        }
+    }
+
     @GetMapping("/info")
     public R admininfo(HttpSession session) {
         try {
