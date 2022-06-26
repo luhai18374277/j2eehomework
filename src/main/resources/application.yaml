@@ -10,7 +10,7 @@ spring:
     allow-circular-references : true
   datasource:
     username: root
-    password: 123456
+    password: 20000209
     url: jdbc:mysql://localhost:3306/library?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:

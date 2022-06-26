@@ -27,6 +27,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/admin")
+@CrossOrigin(origins = "*")
 public class AdminController {
     @Resource
     private UserMapper userMapper;

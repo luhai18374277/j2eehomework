@@ -31,6 +31,7 @@ import java.util.List;
 
 @RequestMapping("/book")
 @RestController
+@CrossOrigin(origins = "*")
 public class BookController {
     @Resource
     private BookMapper bookMapper;

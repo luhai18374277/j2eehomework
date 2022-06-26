@@ -38,6 +38,7 @@ import static com.example.library.common.VerCodeGenerateUtil.generateVerCode;
 @RestController
 @RequestMapping("/user")
 @Component
+@CrossOrigin(origins = "*")
 //@Api(description = "普通用户相关接口")
 public class UserController {
     @Resource

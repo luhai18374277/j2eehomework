@@ -9,16 +9,14 @@ import com.example.library.entity.Collection;
 import com.example.library.entity.User;
 import com.example.library.mapper.CollectionMapper;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 
 @RequestMapping("/collection")
 @RestController
+@CrossOrigin(origins = "*")
 public class CollectionController {
     @Resource
     private CollectionMapper collectionMapper;
