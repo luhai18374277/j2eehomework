@@ -177,8 +177,8 @@ public class BookController {
         }
         //页码，长度
         int pageNo = 1,pageSize = 4;
-        if (param.containsKey("pageNo")){
-            pageNo = param.getInteger("pageNo");
+        if (param.containsKey("current")){
+            pageNo = param.getInteger("current");
         }
         if (param.containsKey("pageSize")){
             pageSize = param.getInteger("pageSize");
@@ -306,8 +306,8 @@ public class BookController {
     public R searchBook(@RequestBody JSONObject param){
         //页码，长度
         int pageNo = 1,pageSize = 4;
-        if (param.containsKey("pageNo")){
-            pageNo = param.getInteger("pageNo");
+        if (param.containsKey("current")){
+            pageNo = param.getInteger("current");
         }
         if (param.containsKey("pageSize")){
             pageSize = param.getInteger("pageSize");

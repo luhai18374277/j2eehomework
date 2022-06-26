@@ -34,13 +34,13 @@ public class CollectionController {
 
         QueryWrapper<Collection> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("uid",user.getId());
-        queryWrapper.eq("bid",id);
+        queryWrapper.eq("symbol_num",id);
         if (collectionMapper.selectCount(queryWrapper) != 0){
             return R.fail("您已经收藏过了");
         }
         Collection collection = new Collection();
         collection.setUid(user.getId());
-        collection.setBid(id);
+        collection.setSymbolNum(id);
         return collectionMapper.insert(collection) == 0? R.fail("收藏失败") : R.success("收藏成功");
     }
 
@@ -55,7 +55,7 @@ public class CollectionController {
 
         QueryWrapper<Collection> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("uid",user.getId());
-        queryWrapper.eq("bid",id);
+        queryWrapper.eq("symbol_num",id);
         Collection collection = collectionMapper.selectOne(queryWrapper);
         if (collectionMapper.selectCount(queryWrapper) == 0){
             return R.fail("未查询到收藏记录");

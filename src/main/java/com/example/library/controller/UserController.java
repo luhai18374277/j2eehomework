@@ -20,9 +20,11 @@ import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 import java.time.Instant;
@@ -35,6 +37,7 @@ import static com.example.library.common.VerCodeGenerateUtil.generateVerCode;
 
 @RestController
 @RequestMapping("/user")
+@Component
 //@Api(description = "普通用户相关接口")
 public class UserController {
     @Resource
@@ -47,9 +50,34 @@ public class UserController {
     private RecordMapper recordMapper;
     @Resource
     private CollectionMapper collectionMapper;
-    @GetMapping("/hello")
-    public String hello() {
-        return "hello";
+    @PostMapping("/hello")
+    public R hello(HttpSession session) {
+        try{
+            User user=new User();
+            user.setName("root");
+            user.setPassword("123456");
+            QueryWrapper<User> wrapper = new QueryWrapper<>();
+            wrapper.eq("name", user.getName());
+            User user1 = userMapper.selectOne(wrapper);
+
+            if (user1 != null) {
+                if (DigestUtils.md5DigestAsHex(user.getPassword().getBytes()).equals(user1.getPassword())) {
+//                    user1.setLoginDate(new Date());
+//                    userMapper.update(user1, wrapper);  //更新登录时间
+                    session.setAttribute(SessionKey.USER_SESSION_key.getCode(), user1);
+                    session.setMaxInactiveInterval(60 * 60);  //
+
+                    return R.success(user1);
+                } else {
+                    return R.fail("密码错误");
+                }
+            } else {
+                return R.fail("不存在该用户名");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return R.fail("未知错误");
+        }
     }
     @GetMapping("/info")
     public R userinfo(HttpSession session) {
@@ -300,8 +328,8 @@ public class UserController {
         }
         //页码，长度
         int pageNo = 1,pageSize = 4;
-        if (param.containsKey("pageNo")){
-            pageNo = param.getInteger("pageNo");
+        if (param.containsKey("current")){
+            pageNo = param.getInteger("current");
         }
         if (param.containsKey("pageSize")){
             pageSize = param.getInteger("pageSize");
@@ -312,6 +340,7 @@ public class UserController {
          return R.success(pageInfo);
     }
 
+//
     @GetMapping("/books")
     @ApiOperation("获取当前个人借书信息")
     public R getUserBooks(HttpSession session,@RequestBody JSONObject param){
@@ -321,8 +350,8 @@ public class UserController {
         User user=(User) session.getAttribute(SessionKey.USER_SESSION_key.getCode());
         //页码，长度
         int pageNo = 1,pageSize = 4;
-        if (param.containsKey("pageNo")){
-            pageNo = param.getInteger("pageNo");
+        if (param.containsKey("current")){
+            pageNo = param.getInteger("current");
         }
         if (param.containsKey("pageSize")){
             pageSize = param.getInteger("pageSize");
@@ -346,8 +375,8 @@ public class UserController {
         User user=(User) session.getAttribute(SessionKey.USER_SESSION_key.getCode());
         //页码，长度
         int pageNo = 1,pageSize = 4;
-        if (param.containsKey("pageNo")){
-            pageNo = param.getInteger("pageNo");
+        if (param.containsKey("current")){
+            pageNo = param.getInteger("current");
         }
         if (param.containsKey("pageSize")){
             pageSize = param.getInteger("pageSize");
@@ -355,6 +384,7 @@ public class UserController {
         PageHelper.startPage(pageNo,pageSize);
         QueryWrapper<Record> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("id",user.getId());
+        System.out.println(user.getId());
         queryWrapper.eq("is_return",2);
 
 //        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
@@ -371,8 +401,8 @@ public class UserController {
         User user=(User) session.getAttribute(SessionKey.USER_SESSION_key.getCode());
         //页码，长度
         int pageNo = 1,pageSize = 4;
-        if (param.containsKey("pageNo")){
-            pageNo = param.getInteger("pageNo");
+        if (param.containsKey("current")){
+            pageNo = param.getInteger("current");
         }
         if (param.containsKey("pageSize")){
             pageSize = param.getInteger("pageSize");
@@ -397,8 +427,8 @@ public class UserController {
         User user=(User) session.getAttribute(SessionKey.USER_SESSION_key.getCode());
         //页码，长度
         int pageNo = 1,pageSize = 4;
-        if (param.containsKey("pageNo")){
-            pageNo = param.getInteger("pageNo");
+        if (param.containsKey("current")){
+            pageNo = param.getInteger("current");
         }
         if (param.containsKey("pageSize")){
             pageSize = param.getInteger("pageSize");
@@ -420,11 +450,11 @@ public class UserController {
             if (session.getAttribute(SessionKey.USER_SESSION_key.getCode()) == null){
                 return R.fail("未登录");
             }
-            Manager user=(Manager) session.getAttribute(SessionKey.USER_SESSION_key.getCode());
+            User user=(User) session.getAttribute(SessionKey.USER_SESSION_key.getCode());
             //页码，长度
             int pageNo = 1,pageSize = 4;
-            if (param.containsKey("pageNo")){
-                pageNo = param.getInteger("pageNo");
+            if (param.containsKey("current")){
+                pageNo = param.getInteger("current");
             }
             if (param.containsKey("pageSize")){
                 pageSize = param.getInteger("pageSize");
@@ -451,8 +481,8 @@ public class UserController {
                 return R.fail("缺少参数select或search");
             }
             //        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-            if(!param.containsKey("current")) return R.fail("缺少参数current");
-            PageInfo<Book> pageInfo = new PageInfo<>(bookMapper.selectList(queryWrapper),param.getInteger("current"));
+
+            PageInfo<Book> pageInfo = new PageInfo<>(bookMapper.selectList(queryWrapper));
 
             return R.success(pageInfo);
         }catch (Exception e) {

@@ -33,6 +33,6 @@ public class Record {
      * 2：已归还;
      * 3:待领取
      */
-    private Integer isReturn;       //设计表是char
+    private Integer isReturn=4;       //设计表是char
 
 }

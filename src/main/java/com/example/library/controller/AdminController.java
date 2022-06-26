@@ -139,8 +139,8 @@ public class AdminController {
             Manager user=(Manager) session.getAttribute(SessionKey.MANANGER_SESSION_key.getCode());
             //页码，长度
             int pageNo = 1,pageSize = 4;
-            if (param.containsKey("pageNo")){
-                pageNo = param.getInteger("pageNo");
+            if (param.containsKey("current")){
+                pageNo = param.getInteger("current");
             }
             if (param.containsKey("pageSize")){
                 pageSize = param.getInteger("pageSize");
@@ -171,8 +171,8 @@ public class AdminController {
                 return R.fail("缺少参数select或search");
             }
     //        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-            if(!param.containsKey("current")) return R.fail("缺少参数current");
-            PageInfo<Record> pageInfo = new PageInfo<>(recordMapper.selectList(queryWrapper),param.getInteger("current"));
+
+            PageInfo<Record> pageInfo = new PageInfo<>(recordMapper.selectList(queryWrapper));
 
             return R.success(pageInfo);
         }catch (Exception e) {
@@ -192,8 +192,8 @@ public class AdminController {
             Manager user=(Manager) session.getAttribute(SessionKey.MANANGER_SESSION_key.getCode());
             //页码，长度
             int pageNo = 1,pageSize = 4;
-            if (param.containsKey("pageNo")){
-                pageNo = param.getInteger("pageNo");
+            if (param.containsKey("current")){
+                pageNo = param.getInteger("current");
             }
             if (param.containsKey("pageSize")){
                 pageSize = param.getInteger("pageSize");
@@ -220,8 +220,8 @@ public class AdminController {
                 return R.fail("缺少参数select或search");
             }
             //        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-            if(!param.containsKey("current")) return R.fail("缺少参数current");
-            PageInfo<Book> pageInfo = new PageInfo<>(bookMapper.selectList(queryWrapper),param.getInteger("current"));
+
+            PageInfo<Book> pageInfo = new PageInfo<>(bookMapper.selectList(queryWrapper));
 
             return R.success(pageInfo);
         }catch (Exception e) {
