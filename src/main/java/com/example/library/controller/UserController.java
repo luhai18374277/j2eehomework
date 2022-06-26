@@ -110,7 +110,7 @@ public class UserController {
                 if (DigestUtils.md5DigestAsHex(user.getPassword().getBytes()).equals(user1.getPassword())) {
 //                    user1.setLoginDate(new Date());
 //                    userMapper.update(user1, wrapper);  //更新登录时间
-                    session.setAttribute(SessionKey.MANANGER_SESSION_key.getCode(), user1);
+                    session.setAttribute(SessionKey.USER_SESSION_key.getCode(), user1);
                     session.setMaxInactiveInterval(60 * 60);  //
 
                     return R.success(user1);
