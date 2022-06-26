@@ -153,6 +153,10 @@ public class AdminController {
             if(param.containsKey("select") && param.containsKey("search")){
                 String select=param.getString("select");
                 String search=param.getString("search");
+                List<Integer> intlist= new ArrayList<>();
+                intlist.add(1);
+                intlist.add(2);
+                queryWrapper.in("is_return",intlist);
                 if(select.equals("图书id")){
                     queryWrapper.eq("symbol_num",search);
                     pageInfo = new PageInfo<>(recordMapper.selectList(queryWrapper));
@@ -169,6 +173,7 @@ public class AdminController {
                         System.out.println("-----"+book.getSymbolNum()+"-----");
                     }
                     queryWrapper.in("symbol_num",list);
+
                     pageInfo = new PageInfo<>(recordMapper.selectList(queryWrapper));
 
                 }else if(select.equals("借阅者id")){

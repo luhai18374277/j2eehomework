@@ -46,23 +46,21 @@ public class BookController {
     @PostMapping("Borrowbooks")
     @ApiOperation("借书功能")
     public R Borrowbooks(@RequestBody JSONObject jsonObject, HttpSession session){
-        if (session.getAttribute(SessionKey.USER_SESSION_key.getCode()) == null ){
+        if (session.getAttribute(SessionKey.MANANGER_SESSION_key.getCode()) == null ){
             return R.fail("请使用管理员账号登录");
         }
         if (!jsonObject.containsKey("symbolNum")){
             return R.fail("请输入书号");
         }
-          if (!jsonObject.containsKey("id")){
-              return R.fail("用户编号");
-
-          }
-          if (!jsonObject.containsKey("password")){
-              return R.fail("请输入密码");
-          }
-          if (jsonObject.getString("password").equals("")){
-              return R.fail("请输入密码");
-
-          }
+        if (!jsonObject.containsKey("id")){
+            return R.fail("用户编号");
+        }
+        if (!jsonObject.containsKey("password")){
+            return R.fail("请输入密码");
+        }
+        if (jsonObject.getString("password").equals("")){
+            return R.fail("请输入密码");
+        }
 
         /**
          * 验证用户信息
@@ -114,7 +112,6 @@ public class BookController {
         }
         if (!param.containsKey("id")){
             return R.fail("用户编号");
-
         }
         if (!param.containsKey("password")){
             return R.fail("请输入密码");
@@ -169,8 +166,8 @@ public class BookController {
      * @param param(pageNo:1,pageSize:5)
      * @return
      */
-    @ApiOperation("获取书籍信息")
-    @PostMapping("getBooksPage")
+    @ApiOperation("获取所有书籍信息")
+    @PostMapping("getallBooks")
     public R getBooksPage(HttpSession session,@RequestBody JSONObject param){
         if (session.getAttribute(SessionKey.MANANGER_SESSION_key.getCode()) == null){
             return R.fail("请使用管理员账号登录");
@@ -229,7 +226,7 @@ public class BookController {
         Book book = bookMapper.selectById(param.getString("symbolNum"));
         book.setRemainingQuantity(book.getRemainingQuantity() + 1);
         bookMapper.updateById(book);
-        return R.fail("还书成功");
+        return R.success("还书成功");
     }
 
     @ApiOperation("预约图书")
@@ -244,8 +241,7 @@ public class BookController {
         if (book.getRemainingQuantity() == 0){
             return R.fail("剩余数量不足");
         }
-        book.setRemainingQuantity(book.getRemainingQuantity()   -1 );
-        bookMapper.updateById(book);
+
         User user = JSON.parseObject(JSONObject.toJSONString(attribute),User.class);
         //验证用户是否已经预约过
         QueryWrapper<Record> queryWrapper = new QueryWrapper<>();
@@ -264,7 +260,16 @@ public class BookController {
         record.setSymbolNum(id);
         record.setId(user.getId());
         record.setBorrowTime(new Date());
-        return recordMapper.insert(record)==0?R.fail("预约失败"):R.success("预约成功");
+
+        if(recordMapper.insert(record)==0){
+            return R.fail("预约失败");
+        }else {
+
+            book.setRemainingQuantity(book.getRemainingQuantity()   -1 );
+            bookMapper.updateById(book);
+            return R.success("预约成功");
+
+        }
     }
 
 
@@ -274,8 +279,7 @@ public class BookController {
         if (session.getAttribute(SessionKey.USER_SESSION_key.getCode()) == null){
             return R.fail("请先登录");
         }
-        Object attribute = session.getAttribute(SessionKey.USER_SESSION_key.getCode());
-        Integer userId = JSON.parseObject(JSONObject.toJSONString(attribute),User.class).getId();
+        Integer userId = ((User) session.getAttribute(SessionKey.USER_SESSION_key.getCode())).getId();
         User user = userMapper.selectById(userId);
         if (user.getRenew() == 0){
             return R.fail("续借次数不足");
@@ -294,11 +298,18 @@ public class BookController {
 //        long returnZone = record.getReturnTime().getTime() + (262656 * 1000);
         Date returnTime =  DateUtil.getMonthDate(record.getReturnTime(),1);
         record.setReturnTime(returnTime);
-        return recordMapper.updateById(record) ==0 ? R.fail("续借失败"): R.success("续借成功");
+
+        if(recordMapper.updateById(record) ==0){
+            return R.fail("续借失败");
+        }else {
+            user.setRenew(user.getRenew() - 1);
+            userMapper.updateById(user);
+            return R.success("续借成功");
+        }
     }
     /**
      *
-     * @param param（入参 book_name：书名，symbol_num：书号,tag:书类,author:作者,hotRecommend:热门推荐（借阅记录,传任何值都可以，传就代表按照借阅记录排序，传空代表不按照借阅记录排序））
+     * @param（入参 book_name：书名，symbol_num：书号,tag:书类,author:作者,hotRecommend:热门推荐（借阅记录,传任何值都可以，传就代表按照借阅记录排序，传空代表不按照借阅记录排序））
      * @return
      */
     @PostMapping("searchBook")
@@ -324,7 +335,7 @@ public class BookController {
             return R.fail("请先登录");
         }
         Object attribute = session.getAttribute(SessionKey.USER_SESSION_key.getCode());
-        Integer userId = JSON.parseObject(JSONObject.toJSONString(attribute),User.class).getId();
+        Integer userId = ((User) session.getAttribute(SessionKey.USER_SESSION_key.getCode())).getId();
         QueryWrapper<Record> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("id",userId);
         queryWrapper.eq("symbol_num",id);
@@ -333,8 +344,18 @@ public class BookController {
         if ( record== null){
             return R.fail("未查询到预约记录");
         }
+        System.out.println("---"+record.getRid());
+//        return recordMapper.deleteById(record.getRid()) ==0? R.fail("取消预约失败") : R.success("取消成功");
+
         record.setIsReturn(4);
-        return recordMapper.updateById(record) ==0? R.fail("取消预约失败") : R.success("取消成功");
+        if(recordMapper.updateById(record)==0){
+            return R.fail("取消预约失败");
+        }else {
+            Book book = bookMapper.selectById(id);
+            book.setRemainingQuantity(book.getRemainingQuantity()   +1 );
+            bookMapper.updateById(book);
+            return R.success("取消预约成功");
+        }
     }
 
 
