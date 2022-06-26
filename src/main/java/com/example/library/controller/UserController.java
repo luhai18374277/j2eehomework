@@ -128,16 +128,23 @@ public class UserController {
     public R login(@RequestBody User user, HttpSession session) {
 
         String name = user.getName();
-        String password = user.getPassword();
-        Map<String, Object> map = new HashMap<>();
+
         try {
+            System.out.println("55555");
+            System.out.println(user);
+            System.out.println("66666");
             QueryWrapper<User> wrapper = new QueryWrapper<>();
             wrapper.eq("name", name);
             User user1 = userMapper.selectOne(wrapper);
+            System.out.println("7777");
 
             if (user1 != null) {
+                System.out.println("88888");
+
                 if (DigestUtils.md5DigestAsHex(user.getPassword().getBytes()).equals(user1.getPassword())) {
-//                    user1.setLoginDate(new Date());
+                    System.out.println("99999");
+
+                    //                    user1.setLoginDate(new Date());
 //                    userMapper.update(user1, wrapper);  //更新登录时间
                     session.setAttribute(SessionKey.USER_SESSION_key.getCode(), user1);
                     session.setMaxInactiveInterval(60 * 60);  //
