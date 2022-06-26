@@ -20,7 +20,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -42,7 +44,7 @@ public class AdminController {
     @PostMapping("/login")
     @ApiOperation(notes = "使用用户密码", value = "登录")
     public R login(@RequestBody Manager user, HttpSession session) {
-
+    //e10adc3949ba59abbe56e057f20f883e
         String name = user.getName();
         String password = user.getPassword();
         Map<String, Object> map = new HashMap<>();
@@ -147,22 +149,31 @@ public class AdminController {
             }
             PageHelper.startPage(pageNo,pageSize);
             QueryWrapper<Record> queryWrapper = new QueryWrapper<>();
+            PageInfo<Record> pageInfo;
             if(param.containsKey("select") && param.containsKey("search")){
                 String select=param.getString("select");
                 String search=param.getString("search");
                 if(select.equals("图书id")){
                     queryWrapper.eq("symbol_num",search);
+                    pageInfo = new PageInfo<>(recordMapper.selectList(queryWrapper));
+
                 }else if(select.equals("图书名称")){
                     QueryWrapper<Book> BookqueryWrapper = new QueryWrapper<>();
 
                     BookqueryWrapper.eq("book_name",search);
 
-                    Book book=bookMapper.selectOne(BookqueryWrapper);
-
-                    queryWrapper.eq("symbol_num",book.getSymbolNum());
+                    List<Book> booklist=bookMapper.selectList(BookqueryWrapper);
+                    List<String> list= new ArrayList<>();
+                    for(Book book:booklist){
+                        list.add(book.getSymbolNum());
+                        System.out.println("-----"+book.getSymbolNum()+"-----");
+                    }
+                    queryWrapper.in("symbol_num",list);
+                    pageInfo = new PageInfo<>(recordMapper.selectList(queryWrapper));
 
                 }else if(select.equals("借阅者id")){
                     queryWrapper.eq("id",search);
+                    pageInfo = new PageInfo<>(recordMapper.selectList(queryWrapper));
 
                 }else {
                     return R.fail("select参数错误");
@@ -172,7 +183,6 @@ public class AdminController {
             }
     //        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
 
-            PageInfo<Record> pageInfo = new PageInfo<>(recordMapper.selectList(queryWrapper));
 
             return R.success(pageInfo);
         }catch (Exception e) {
